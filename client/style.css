@@ -1,0 +1,22 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 1rem;
+}
+
+form {
+  margin-bottom: 1rem;
+}
+
+input {
+  margin-right: 0.5rem;
+  padding: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+}
+
+#register-message, #login-message {
+  margin-top: 0.5rem;
+  font-weight: bold;
+}

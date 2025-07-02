@@ -1,0 +1,54 @@
+services:
+  api:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./api:/var/www/html
+      - ./docker/conf/api.conf:/etc/nginx/conf.d/api.conf
+      - ./docker/log:/var/log/nginx
+    depends_on:
+      php:
+        condition: service_started
+  client:
+    image: nginx:alpine
+    ports:
+      - "8001:80"
+    volumes:
+      - ./client:/var/www/html
+      - ./docker/conf/client.conf:/etc/nginx/conf.d/client.conf
+      - ./docker/log:/var/log/nginx
+  php:
+    build:
+      context: ./docker
+    volumes:
+      - ./api:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    healthcheck:
+      test: ["CMD", "mariadb-admin" , "-u", "root", '-proot', "ping", "-h", "localhost"]
+      start_period: 10s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - ./support/db.sql:/Docker_Demo_3/support/db.sql
+      - db_data:/var/lib/mysql
+  print-status:
+    image: busybox
+    command: "echo '---\nAPI: http://localhost:8000. CLIENT: http://localhost:8001. USE CTRL+C TO TERMINATE.\n---'"
+    depends_on:
+      api:
+        condition: service_started
+      client:
+        condition: service_started
+      mariadb:
+        condition: service_healthy
+volumes:
+    db_data:
